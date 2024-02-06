@@ -9,15 +9,25 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * This builds the in memory local cache with provided configurations and implementations
+ * @param <K> Type of Key
+ * @param <V> Type of Value
+ */
 public class CachewBuilder<K, V> {
 
     private CacheConfiguration configuration;
-    private SourceRetriever<K, V> retriever;
+    private CacheOrigin<K, V> retriever;
 
     private CacheStorage<K, V> storage;
 
     private List<EvictionPolicy<CacheNode<K, V>>> evictionPolicies;
 
+    /**
+     * Specifies {@link CacheConfiguration} to be used in this cache.
+     * @param configuration
+     * @return
+     */
     public CachewBuilder<K, V> withCacheConfiguration(CacheConfiguration configuration) {
         this.configuration = configuration;
         return this;
@@ -32,7 +42,7 @@ public class CachewBuilder<K, V> {
         return this;
     }
 
-    public CachewBuilder<K, V> withSourceRetriever(SourceRetriever<K, V> retriever) {
+    public CachewBuilder<K, V> withSourceRetriever(CacheOrigin<K, V> retriever) {
         this.retriever = retriever;
         return this;
     }

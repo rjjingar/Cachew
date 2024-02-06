@@ -2,8 +2,9 @@ package org.cachew.cache.internal;
 
 import org.cachew.cache.CacheStorage;
 import org.cachew.cache.CacheStorageInMem;
-import org.cachew.cache.SourceRetriever;
+import org.cachew.cache.CacheOrigin;
 import org.cachew.cache.SourceRetrieverSample;
+import org.cachew.cache.error.CachewException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,8 +14,8 @@ import java.util.Map;
 
 public class CacheStorageAdapterTest {
 
-    private SourceRetriever<String, String> retriever;
-    private CacheStorage<String, String> storage;
+    private CacheOrigin<String, String> origin;
+    private CacheStorage<String, String> cache;
 
     private String[] keys;
     private String[] values;
@@ -31,13 +32,13 @@ public class CacheStorageAdapterTest {
             values[i] = "test-val-" + i;
             sampleSource.put(keys[i], values[i]);
         }
-        this.storage = new CacheStorageInMem<>();
-        this.retriever = new SourceRetrieverSample(sampleSource);
+        this.cache = new CacheStorageInMem<>();
+        this.origin = new SourceRetrieverSample(sampleSource);
     }
 
     @Test
-    public void testCacheUpdateFromSource() {
-        CacheStorageAdapter<String, String> adapter = new CacheStorageAdapter<>(storage, retriever);
+    public void testCacheUpdateFromSource() throws CachewException {
+        CacheStorageAdapter<String, String> adapter = new CacheStorageAdapter<>(cache, origin);
 
         for (int i = 0; i < maxKeys; i++) {
             Assert.assertNull(adapter.fetchFromCache(keys[i]));
@@ -47,8 +48,34 @@ public class CacheStorageAdapterTest {
     }
 
     @Test
-    public void testPutInCache() {
-        CacheStorageAdapter<String, String> adapter = new CacheStorageAdapter<>(storage, null);
+    public void testKeyNotFoundInOrigin() {
+        CacheStorageAdapter<String, String> adapter = new CacheStorageAdapter<>(cache, origin);
+        boolean exceptionFound = false;
+        try {
+            adapter.fetch("invalid-key", null);
+        } catch (CachewException e) {
+            exceptionFound = true;
+            Assert.assertEquals(CachewException.CachewErrorCode.KEY_NOT_FOUND_ORIGIN, e.getErrorCode());
+        }
+        Assert.assertTrue(exceptionFound);
+    }
+
+    @Test
+    public void testKeyNotFoundInCache() {
+        CacheStorageAdapter<String, String> adapter = new CacheStorageAdapter<>(cache, null); // no origin
+        boolean exceptionFound = false;
+        try {
+            adapter.fetch("invalid-key", null);
+        } catch (CachewException e) {
+            exceptionFound = true;
+            Assert.assertEquals(CachewException.CachewErrorCode.KEY_NOT_FOUND_CACHE, e.getErrorCode());
+        }
+        Assert.assertTrue(exceptionFound);
+    }
+
+    @Test
+    public void testPutInCache() throws CachewException {
+        CacheStorageAdapter<String, String> adapter = new CacheStorageAdapter<>(cache, null);
         for (int i = 0; i < maxKeys; i++) {
             Assert.assertNull(adapter.fetchFromCache(keys[i]));
             adapter.putInCache(keys[i], values[i], null);

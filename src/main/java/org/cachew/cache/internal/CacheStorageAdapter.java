@@ -2,22 +2,36 @@ package org.cachew.cache.internal;
 
 import lombok.RequiredArgsConstructor;
 import org.cachew.cache.CacheStorage;
-import org.cachew.cache.SourceRetriever;
+import org.cachew.cache.CacheOrigin;
+import org.cachew.cache.error.CachewException;
+import org.cachew.cache.error.OriginException;
 
 import java.time.Duration;
 import java.util.Optional;
 import java.util.Set;
 
+import static org.cachew.cache.error.CachewException.CachewErrorCode.KEY_NOT_FOUND_CACHE;
+import static org.cachew.cache.error.CachewException.CachewErrorCode.KEY_NOT_FOUND_ORIGIN;
+import static org.cachew.cache.error.OriginException.OriginErrorCode.ORIGIN_NOT_SET;
+
 @RequiredArgsConstructor
 public class CacheStorageAdapter<K, V> {
 
     private final CacheStorage<K, V> cacheStorage;
-    private final SourceRetriever<K, V> retriever;
+    private final CacheOrigin<K, V> cacheOrigin;
 
-    public CacheNode<K, V> fetch(final K key, final Duration ttl) {
+    public CacheNode<K, V> fetch(final K key, final Duration ttl) throws CachewException {
         CacheNode<K, V> cacheNode = fetchFromCache(key);
         if (cacheNode == null) {
-            return refreshFromSource(key, ttl);
+            try {
+                cacheNode = refreshFromSource(key, ttl);
+            } catch (OriginException e) {
+                if (e.getErrorCode() == ORIGIN_NOT_SET) {
+                    throw new CachewException(KEY_NOT_FOUND_CACHE);
+                } else {
+                    throw new CachewException(KEY_NOT_FOUND_ORIGIN);
+                }
+            }
         }
         return cacheNode;
     }
@@ -34,11 +48,12 @@ public class CacheStorageAdapter<K, V> {
         return cacheNode;
     }
 
-    public CacheNode<K, V> refreshFromSource(final K key, final Duration ttl) {
-        if (this.retriever == null) {
-            return null;
+    public CacheNode<K, V> refreshFromSource(final K key, final Duration ttl) throws OriginException {
+        if (this.cacheOrigin == null) {
+            throw new OriginException(ORIGIN_NOT_SET);
         }
-        Optional<V> valueOptional = retriever.retriveValue(key);
+
+        Optional<V> valueOptional = cacheOrigin.retriveValue(key);
         V valueFromSource = valueOptional.orElse(null);
         CacheNode<K, V> cacheNode = cacheStorage.setValue(key, valueFromSource);
         if (ttl != null) {

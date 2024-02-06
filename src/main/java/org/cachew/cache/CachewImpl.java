@@ -1,6 +1,8 @@
 package org.cachew.cache;
 
 import lombok.RequiredArgsConstructor;
+import org.cachew.cache.error.CachewException;
+import org.cachew.cache.error.OriginException;
 import org.cachew.cache.eviction.EvictionPolicy;
 import org.cachew.cache.internal.CacheConfiguration;
 import org.cachew.cache.internal.CacheNode;
@@ -25,7 +27,7 @@ public class CachewImpl<K, V> implements Cachew<K, V> {
     }
 
     @Override
-    public V getValue(K key) {
+    public V getValue(K key) throws CachewException {
         CacheNode<K, V> cacheNode = adapter.fetch(key, configuration.getGlobalTtlDuration());
         if (cacheNode != null) {
             resetAccess(cacheNode);
@@ -47,8 +49,13 @@ public class CachewImpl<K, V> implements Cachew<K, V> {
     }
 
     @Override
-    public V refreshValue(K key) {
-        CacheNode<K, V> cacheNode = adapter.refreshFromSource(key, configuration.getGlobalTtlDuration());
+    public V refreshValue(K key) throws OriginException {
+        return refreshValue(key, configuration.getGlobalTtlDuration());
+    }
+
+    @Override
+    public V refreshValue(final K key, final Duration ttl) throws OriginException {
+        CacheNode<K, V> cacheNode = adapter.refreshFromSource(key, ttl);
         if (cacheNode != null) {
             resetAccess(cacheNode);
             return cacheNode.getValue();
@@ -68,7 +75,7 @@ public class CachewImpl<K, V> implements Cachew<K, V> {
     }
 
     private void resetAccess(CacheNode<K, V> cacheNode) {
-        evictionPolicies.forEach(e -> e.resetAccess(cacheNode, configuration.getGlobalTtlDuration()));
+        evictionPolicies.forEach(e -> e.accessKey(cacheNode, configuration.getGlobalTtlDuration()));
     }
 
 

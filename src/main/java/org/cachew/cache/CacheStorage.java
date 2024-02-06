@@ -17,4 +17,6 @@ public interface CacheStorage<K, V> {
 
     public void clearStorage();
 
+    public int size();
+
 }

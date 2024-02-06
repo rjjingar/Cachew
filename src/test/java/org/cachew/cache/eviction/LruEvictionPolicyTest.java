@@ -1,5 +1,6 @@
 package org.cachew.cache.eviction;
 
+import org.cachew.cache.error.CachewException;
 import org.cachew.cache.internal.CacheNode;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -22,7 +23,7 @@ public class LruEvictionPolicyTest {
 
 
     @Test
-    public void testEviction() {
+    public void testEviction() throws CachewException {
         int lruSize = 10;
         LruEvictionPolicy<String, String> policy = new LruEvictionPolicy<>(lruSize);
         Assert.assertFalse(policy.shouldApply()); // since LRU is empty
@@ -31,7 +32,7 @@ public class LruEvictionPolicyTest {
         int evictedIdx = 0;
         for (int i = 0; i < MAX_NODES; i++) {
             Assert.assertFalse(policy.shouldEvictNode(ALL_NODES[i])); // always should be false;
-            policy.resetAccess(ALL_NODES[i]); // add to LRU
+            policy.accessKey(ALL_NODES[i]); // add to LRU
             Assert.assertFalse(policy.shouldEvictNode(ALL_NODES[i])); // always should be false;
             Set<CacheNode<String, String>> newKeysEvicted = policy.evictKeys();
 

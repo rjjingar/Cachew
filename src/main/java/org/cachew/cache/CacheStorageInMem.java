@@ -24,7 +24,7 @@ public class CacheStorageInMem<K, V> implements CacheStorage<K, V> {
     }
 
     @Override
-    public CacheNode<K, V> setValue(@NonNull K key, @NonNull V value) {
+    public CacheNode<K, V> setValue(@NonNull K key, V value) {
         CacheNode<K, V> cacheNode = getCacheNode(key);
         if (cacheNode == null) {
             cacheNode = new CacheNode<>(key, value);
@@ -46,5 +46,10 @@ public class CacheStorageInMem<K, V> implements CacheStorage<K, V> {
     @Override
     public void clearStorage() {
         this.map.clear();
+    }
+
+    @Override
+    public int size() {
+        return map.size();
     }
 }

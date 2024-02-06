@@ -8,7 +8,6 @@ import java.util.Set;
 
 public class TtlEvictionPolicy<K, V> implements EvictionPolicy<CacheNode<K, V>> {
 
-
     @Override
     public boolean shouldApply() {
         return false;
@@ -28,13 +27,19 @@ public class TtlEvictionPolicy<K, V> implements EvictionPolicy<CacheNode<K, V>> 
     }
 
     @Override
-    public void resetAccess(CacheNode<K, V> cacheNode) {
-        cacheNode.resetLastAccessTime();
+    public void accessKey(CacheNode<K, V> cacheNode) {
+        cacheNode.resetAccessTime();
     }
 
     @Override
-    public void resetAccess(CacheNode<K, V> cacheNode, Duration ttl) {
-        resetAccess(cacheNode);
+    public void accessKey(CacheNode<K, V> cacheNode, Duration ttl) {
+        accessKey(cacheNode);
         cacheNode.setExpiry(ttl);
+    }
+
+    @Override
+    public void removeKey(CacheNode<K, V> cacheNode) {
+        // TTL eviction policy does not need to remove this node
+        // as there is no auxiliary storage
     }
 }

@@ -1,20 +1,103 @@
 package org.cachew.cache.list;
 
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Thread safe linked list implementation with O(1) access to internal nodes.
+ * It does not allow duplicate entries to exist.
+ * @param <E> Data type stored in linked list
+ */
 public class IndexedLinkedList<E> {
-    private ConcurrentHashMap<E, Node<E>> nodeMap;
+    protected ConcurrentHashMap<E, Node<E>> nodeMap;
 
-    private Node<E> head;
-    private Node<E> tail;
+    protected Node<E> head;
+    protected Node<E> tail;
 
     public IndexedLinkedList() {
         this.nodeMap = new ConcurrentHashMap<>();
     }
 
+    public IndexedLinkedList(List<E> other) {
+        this.nodeMap = new ConcurrentHashMap<>();
+        for (E next : other) {
+            addLast(next);
+        }
+    }
+
+    /** Basic access pattern for linked list */
+    public Node<E> addFirst(E element) {
+        Node<E> node = findByIndex(element);
+        if (node != null && node == head) {
+            // existing node and is already at head
+            return node;
+        }
+
+        if (node != null) {
+            // existing node
+            removeFromList(node);
+        } else {
+            // it is a new node
+            node = new Node<>(element);
+            addToMap(node);
+        }
+
+        node.setNext(head);
+        node.setPrev(null);
+        head = node;
+        if (tail == null) {
+            tail = node;
+        }
+        return node;
+    }
+
+    public Node<E> addLast(E element) {
+        Node<E> node = findByIndex(element);
+        if (node != null && node == tail) {
+            // existing node and is already at tail
+            return node;
+        }
+        if (node != null) {
+            // existing node
+            removeFromList(node);
+        } else {
+            // it is a new node
+            node = new Node<>(element);
+            addToMap(node);
+        }
+
+        node.setNext(null);
+        node.setPrev(tail);
+        tail = node;
+        if (head == null) {
+            head = node;
+        }
+        return node;
+    }
+
+    public Node<E> removeFirst() {
+        if (head == null) {
+            return null;
+        }
+        Node<E> node = head;
+        removeNode(node);
+        return node;
+    }
+
+    public Node<E> removeLast() {
+        if (tail == null) {
+            return null;
+        }
+        Node<E> node = tail;
+        removeNode(node);
+        return node;
+    }
+
     public Node<E> findByIndex(final E key) {
         if (nodeMap.containsKey(key)) {
-            nodeMap.get(key);
+            Node<E> curr = nodeMap.get(key);
+            curr.setElement(key);
+            return curr;
         }
         return null;
     }
@@ -68,49 +151,13 @@ public class IndexedLinkedList<E> {
         return node;
     }
 
-    public Node<E> addFirst(E element) {
-        Node<E> node = new Node<>(element);
-        node.setNext(head);
-        node.setPrev(null);
-        head = node;
-        if (tail == null) {
-            tail = node;
-        }
-        addToMap(node);
-        return node;
-    }
-
-    public Node<E> addLast(E element) {
-        Node<E> node = new Node<>(element);
-        node.setNext(null);
-        node.setPrev(tail);
-        tail = node;
-        if (head == null) {
-            head = node;
-        }
-        addToMap(node);
-        return node;
-    }
-
-    public Node<E> removeFirst() {
-        if (head == null) {
-            return null;
-        }
-        Node<E> node = head;
-        head = node.getNext();
-        removeNode(node);
-        return node;
-    }
-
-    public Node<E> removeLast() {
+    public E evictNode() {
         if (tail == null) {
             return null;
         }
         Node<E> node = tail;
-        tail = node.getPrev();
-        tail.setNext(null);
         removeNode(node);
-        return node;
+        return node.getElement();
     }
 
     public int size() {
@@ -131,9 +178,8 @@ public class IndexedLinkedList<E> {
         return null;
     }
 
-    private void removeNode(Node<E> node) {
-        node.setPrev(null);
-        node.setNext(null);
+    public void removeNode(Node<E> node) {
+        removeFromList(node);
         removeFromMap(node);
     }
 
@@ -146,6 +192,18 @@ public class IndexedLinkedList<E> {
         nodeMap.remove(node.getElement());
     }
 
-
-
+    private void removeFromList(final Node<E> node) {
+        if (node == tail) {
+            tail = node.getPrev();
+            if (tail != null) {
+                tail.setNext(null);
+            }
+        }
+        if (node == head) {
+            head = node.getNext();
+            head.setPrev(null);
+        }
+        node.setPrev(null);
+        node.setNext(null);
+    }
 }

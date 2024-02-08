@@ -1,7 +1,7 @@
 package org.cachew.cache.list;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
@@ -13,8 +13,8 @@ public class IndexedLinkedListTest {
         list.addFirst(3);
         list.addFirst(2);
         list.addFirst(1);
-        Assert.assertEquals(3, list.size());
-        Assert.assertEquals(1, list.getFirst().intValue());
+        Assertions.assertEquals(3, list.size());
+        Assertions.assertEquals(1, list.getFirst().intValue());
     }
 
     @Test
@@ -25,9 +25,9 @@ public class IndexedLinkedListTest {
         list.addLast(2);
         list.addFirst(1);
         list.addLast(0);
-        Assert.assertEquals(4, list.size());
-        Assert.assertEquals(1, list.getFirst().intValue());
-        Assert.assertEquals(0, list.getLast().intValue());
+        Assertions.assertEquals(4, list.size());
+        Assertions.assertEquals(1, list.getFirst().intValue());
+        Assertions.assertEquals(0, list.getLast().intValue());
     }
 
     @Test
@@ -41,36 +41,36 @@ public class IndexedLinkedListTest {
 
         list.removeLast(); // [1, 3, 2]
 
-        Assert.assertEquals(3, list.size());
-        Assert.assertEquals(1, list.getFirst().intValue());
-        Assert.assertEquals(2, list.getLast().intValue());
+        Assertions.assertEquals(3, list.size());
+        Assertions.assertEquals(1, list.getFirst().intValue());
+        Assertions.assertEquals(2, list.getLast().intValue());
 
         list.removeFirst(); // [3, 2]
-        Assert.assertEquals(2, list.size());
-        Assert.assertEquals(3, list.getFirst().intValue());
-        Assert.assertEquals(2, list.getLast().intValue());
+        Assertions.assertEquals(2, list.size());
+        Assertions.assertEquals(3, list.getFirst().intValue());
+        Assertions.assertEquals(2, list.getLast().intValue());
     }
 
     @Test
     public void testFindByIndex() {
         IndexedLinkedList<Integer> list = new IndexedLinkedList<>(Arrays.asList(10, 20, 30, 40, 50));
-        Assert.assertEquals(30, list.findByIndex(30).getElement().intValue());
-        Assert.assertEquals(50, list.findByIndex(50).getElement().intValue());
+        Assertions.assertEquals(30, list.findByIndex(30).getElement().intValue());
+        Assertions.assertEquals(50, list.findByIndex(50).getElement().intValue());
     }
 
     @Test
     public void testFindByIndexAndRemove() {
         IndexedLinkedList<Integer> list = new IndexedLinkedList<>(Arrays.asList(10, 20, 30, 40, 50));
-        Assert.assertEquals(20, list.findByIndex(20).getElement().intValue());
+        Assertions.assertEquals(20, list.findByIndex(20).getElement().intValue());
         list.removeNode(new Node<>(20));
-        Assert.assertEquals(null, list.findByIndex(20));
+        Assertions.assertEquals(null, list.findByIndex(20));
     }
 
     @Test
     public void testMoveToHead() {
         IndexedLinkedList<Integer> list = new IndexedLinkedList<>(Arrays.asList(10, 20, 30, 40, 50));
-        Assert.assertEquals(10, list.getFirst().intValue());
+        Assertions.assertEquals(10, list.getFirst().intValue());
         list.moveNodeToHead(20);
-        Assert.assertEquals(20, list.getFirst().intValue());
+        Assertions.assertEquals(20, list.getFirst().intValue());
     }
 }

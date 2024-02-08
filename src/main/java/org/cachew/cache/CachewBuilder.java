@@ -1,12 +1,13 @@
 package org.cachew.cache;
 
+import org.cachew.cache.error.CachewException;
 import org.cachew.cache.eviction.EvictionPolicy;
+import org.cachew.cache.eviction.LruEvictionPolicy;
 import org.cachew.cache.internal.CacheConfiguration;
 import org.cachew.cache.internal.CacheNode;
 import org.cachew.cache.internal.CacheStorageAdapter;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -17,8 +18,7 @@ import java.util.List;
 public class CachewBuilder<K, V> {
 
     private CacheConfiguration configuration;
-    private CacheOrigin<K, V> retriever;
-
+    private CacheOrigin<K, V> cacheOrigin;
     private CacheStorage<K, V> storage;
 
     private List<EvictionPolicy<CacheNode<K, V>>> evictionPolicies;
@@ -42,8 +42,8 @@ public class CachewBuilder<K, V> {
         return this;
     }
 
-    public CachewBuilder<K, V> withSourceRetriever(CacheOrigin<K, V> retriever) {
-        this.retriever = retriever;
+    public CachewBuilder<K, V> withCacheOrigin(CacheOrigin<K, V> origin) {
+        this.cacheOrigin = origin;
         return this;
     }
 
@@ -59,11 +59,25 @@ public class CachewBuilder<K, V> {
         if (this.configuration == null) {
             this.configuration = CacheConfiguration.builder().build();
         }
-        if (this.evictionPolicies == null) {
-            this.evictionPolicies = Collections.emptyList();
-        }
-        final CacheStorageAdapter<K, V> adapter = new CacheStorageAdapter<>(storage, retriever);
+        setDefaultEvictionPolicyIfNotSet();
+        final CacheStorageAdapter<K, V> adapter = new CacheStorageAdapter<>(storage, cacheOrigin);
 
         return new CachewImpl<>(configuration, adapter, evictionPolicies);
+    }
+
+    private void setDefaultEvictionPolicyIfNotSet() {
+        if (this.evictionPolicies != null && !this.evictionPolicies.isEmpty()) {
+            return;
+        }
+
+        this.evictionPolicies = new ArrayList<>();
+
+        if (this.configuration != null) {
+            if (this.configuration.getMaxKeys() > 0) {
+                try {
+                    this.evictionPolicies.add(new LruEvictionPolicy<>(this.configuration.getMaxKeys()));
+                } catch (CachewException e) {}
+            }
+        }
     }
 }

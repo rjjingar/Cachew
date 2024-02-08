@@ -1,8 +1,7 @@
 package org.cachew.cache;
 
-import org.cachew.cache.CacheStorageInMem;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class CacheStorageInMemTest {
 
@@ -14,9 +13,9 @@ public class CacheStorageInMemTest {
         String testVal1 = "test-val-1";
         storage.setValue(testKey1, testVal1);
 
-        Assert.assertTrue(storage.hasKey(testKey1));
-        Assert.assertFalse(storage.hasKey(testKey2));
-        Assert.assertEquals(testVal1, storage.getCacheNode(testKey1).getValue());
+        Assertions.assertTrue(storage.hasKey(testKey1));
+        Assertions.assertFalse(storage.hasKey(testKey2));
+        Assertions.assertEquals(testVal1, storage.getCacheNode(testKey1).getValue());
     }
 
     @Test
@@ -31,11 +30,11 @@ public class CacheStorageInMemTest {
 
         storage.remove(testKey1);
 
-        Assert.assertFalse(storage.hasKey(testKey1));
-        Assert.assertNull(storage.getCacheNode(testKey1));
+        Assertions.assertFalse(storage.hasKey(testKey1));
+        Assertions.assertNull(storage.getCacheNode(testKey1));
 
-        Assert.assertTrue(storage.hasKey(testKey2));
-        Assert.assertEquals(testVal2, storage.getCacheNode(testKey2).getValue());
+        Assertions.assertTrue(storage.hasKey(testKey2));
+        Assertions.assertEquals(testVal2, storage.getCacheNode(testKey2).getValue());
     }
 
     @Test
@@ -49,7 +48,7 @@ public class CacheStorageInMemTest {
         storage.setValue(testKey2, testVal2);
 
         storage.clearStorage();
-        Assert.assertFalse(storage.hasKey(testKey1));
-        Assert.assertFalse(storage.hasKey(testKey2));
+        Assertions.assertFalse(storage.hasKey(testKey1));
+        Assertions.assertFalse(storage.hasKey(testKey2));
     }
 }

@@ -6,5 +6,5 @@ import java.util.Optional;
 
 public interface CacheOrigin<K, V> {
 
-    public Optional<V> retriveValue(K key) throws OriginException;
+    public Optional<V> retrieveValue(K key) throws OriginException;
 }

@@ -43,9 +43,9 @@ public class CachewImpl<K, V> implements Cachew<K, V> {
 
     @Override
     public void putValue(K key, V val, Duration ttl) {
-        evictIfNeeded();
         CacheNode<K, V> cacheNode = adapter.putInCache(key, val, ttl);
         resetAccess(cacheNode);
+        evictIfNeeded();
     }
 
     @Override

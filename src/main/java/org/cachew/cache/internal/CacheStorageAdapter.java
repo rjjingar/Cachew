@@ -22,12 +22,16 @@ public class CacheStorageAdapter<K, V> {
 
     public CacheNode<K, V> fetch(final K key, final Duration ttl) throws CachewException {
         CacheNode<K, V> cacheNode = fetchFromCache(key);
+        if (cacheNode != null && cacheNode.hasExpired()) {
+            cacheStorage.remove(key);
+            cacheNode = null;
+        }
         if (cacheNode == null) {
             try {
                 cacheNode = refreshFromSource(key, ttl);
             } catch (OriginException e) {
                 if (e.getErrorCode() == ORIGIN_NOT_SET) {
-                    throw new CachewException(KEY_NOT_FOUND_CACHE);
+                    throw new CachewException(KEY_NOT_FOUND_CACHE, String.valueOf(key));
                 } else {
                     throw new CachewException(KEY_NOT_FOUND_ORIGIN);
                 }
@@ -53,7 +57,7 @@ public class CacheStorageAdapter<K, V> {
             throw new OriginException(ORIGIN_NOT_SET);
         }
 
-        Optional<V> valueOptional = cacheOrigin.retriveValue(key);
+        Optional<V> valueOptional = cacheOrigin.retrieveValue(key);
         V valueFromSource = valueOptional.orElse(null);
         CacheNode<K, V> cacheNode = cacheStorage.setValue(key, valueFromSource);
         if (ttl != null) {

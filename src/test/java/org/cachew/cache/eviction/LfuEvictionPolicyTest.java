@@ -2,9 +2,9 @@ package org.cachew.cache.eviction;
 
 import org.cachew.cache.error.CachewException;
 import org.cachew.cache.internal.CacheNode;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
@@ -12,7 +12,7 @@ public class LfuEvictionPolicyTest {
 
     private static int MAX_NODES = 20;
     private static CacheNode<String, String>[] ALL_NODES;
-    @BeforeClass
+    @BeforeAll
     public static void setup() {
         ALL_NODES = new CacheNode[MAX_NODES];
         for (int i = 0; i < MAX_NODES; i++) {
@@ -25,8 +25,8 @@ public class LfuEvictionPolicyTest {
         int cacheSize = 3;
         LfuEvictionPolicy<String, String> policy = new LfuEvictionPolicy<>(cacheSize);
 
-        Assert.assertFalse(policy.shouldApply()); // since LRU is empty
-        Assert.assertEquals(0, policy.evictKeys().size()); // 0 keys to be evicted
+        Assertions.assertFalse(policy.shouldApply()); // since LRU is empty
+        Assertions.assertEquals(0, policy.evictKeys().size()); // 0 keys to be evicted
 
 
         for (int i = 0; i < 10; i++) policy.accessKey(ALL_NODES[0]);
@@ -35,9 +35,9 @@ public class LfuEvictionPolicyTest {
         for (int i = 0; i < 20; i++) policy.accessKey(ALL_NODES[3]);
 
 
-        Assert.assertEquals(true, policy.shouldApply());
+        Assertions.assertEquals(true, policy.shouldApply());
         Set<CacheNode<String, String>> newKeysEvicted = policy.evictKeys();
-        Assert.assertEquals(1, newKeysEvicted.size());
-        Assert.assertEquals(ALL_NODES[1], newKeysEvicted.iterator().next());
+        Assertions.assertEquals(1, newKeysEvicted.size());
+        Assertions.assertEquals(ALL_NODES[1], newKeysEvicted.iterator().next());
     }
 }

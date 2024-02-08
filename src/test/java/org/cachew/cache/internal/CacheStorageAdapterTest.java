@@ -1,13 +1,13 @@
 package org.cachew.cache.internal;
 
+import org.cachew.cache.CacheOrigin;
 import org.cachew.cache.CacheStorage;
 import org.cachew.cache.CacheStorageInMem;
-import org.cachew.cache.CacheOrigin;
-import org.cachew.cache.SourceRetrieverSample;
+import org.cachew.cache.CacheOriginSample;
 import org.cachew.cache.error.CachewException;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,7 +22,7 @@ public class CacheStorageAdapterTest {
 
     private int maxKeys = 10;
 
-    @Before
+    @BeforeEach
     public void setup() {
         Map<String, String> sampleSource = new HashMap<>();
         this.keys = new String[maxKeys];
@@ -33,7 +33,7 @@ public class CacheStorageAdapterTest {
             sampleSource.put(keys[i], values[i]);
         }
         this.cache = new CacheStorageInMem<>();
-        this.origin = new SourceRetrieverSample(sampleSource);
+        this.origin = new CacheOriginSample(sampleSource);
     }
 
     @Test
@@ -41,9 +41,9 @@ public class CacheStorageAdapterTest {
         CacheStorageAdapter<String, String> adapter = new CacheStorageAdapter<>(cache, origin);
 
         for (int i = 0; i < maxKeys; i++) {
-            Assert.assertNull(adapter.fetchFromCache(keys[i]));
-            Assert.assertEquals(values[i], adapter.fetch(keys[i], null).getValue());
-            Assert.assertEquals(values[i], adapter.fetchFromCache(keys[i]).getValue());
+            Assertions.assertNull(adapter.fetchFromCache(keys[i]));
+            Assertions.assertEquals(values[i], adapter.fetch(keys[i], null).getValue());
+            Assertions.assertEquals(values[i], adapter.fetchFromCache(keys[i]).getValue());
         }
     }
 
@@ -55,9 +55,9 @@ public class CacheStorageAdapterTest {
             adapter.fetch("invalid-key", null);
         } catch (CachewException e) {
             exceptionFound = true;
-            Assert.assertEquals(CachewException.CachewErrorCode.KEY_NOT_FOUND_ORIGIN, e.getErrorCode());
+            Assertions.assertEquals(CachewException.CachewErrorCode.KEY_NOT_FOUND_ORIGIN, e.getErrorCode());
         }
-        Assert.assertTrue(exceptionFound);
+        Assertions.assertTrue(exceptionFound);
     }
 
     @Test
@@ -68,20 +68,20 @@ public class CacheStorageAdapterTest {
             adapter.fetch("invalid-key", null);
         } catch (CachewException e) {
             exceptionFound = true;
-            Assert.assertEquals(CachewException.CachewErrorCode.KEY_NOT_FOUND_CACHE, e.getErrorCode());
+            Assertions.assertEquals(CachewException.CachewErrorCode.KEY_NOT_FOUND_CACHE, e.getErrorCode());
         }
-        Assert.assertTrue(exceptionFound);
+        Assertions.assertTrue(exceptionFound);
     }
 
     @Test
     public void testPutInCache() throws CachewException {
         CacheStorageAdapter<String, String> adapter = new CacheStorageAdapter<>(cache, null);
         for (int i = 0; i < maxKeys; i++) {
-            Assert.assertNull(adapter.fetchFromCache(keys[i]));
+            Assertions.assertNull(adapter.fetchFromCache(keys[i]));
             adapter.putInCache(keys[i], values[i], null);
 
-            Assert.assertEquals(values[i], adapter.fetchFromCache(keys[i]).getValue());
-            Assert.assertEquals(values[i], adapter.fetch(keys[i], null).getValue());
+            Assertions.assertEquals(values[i], adapter.fetchFromCache(keys[i]).getValue());
+            Assertions.assertEquals(values[i], adapter.fetch(keys[i], null).getValue());
         }
     }
 }

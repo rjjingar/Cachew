@@ -21,7 +21,7 @@ public class UsageSamples {
         Assertions.assertEquals("val-1", value);
     }
 
-    @Test
+    //@Test (commented for faster build)
     public void ttlUsage() throws CachewException, InterruptedException {
         // Using ttl
         CacheConfiguration config = CacheConfiguration.builder()

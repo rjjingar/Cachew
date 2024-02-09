@@ -10,9 +10,19 @@ Cachew is a lightweight Java library for adding in-memory local cache to your ap
 
 ## Dependency
 
-Add it to your application dependency
-
-``` TO be added```
+Add it to your application dependency [See] (https://mavenlibs.com/maven/dependency/io.github.rjjingar/cachew)
+### Maven
+```
+<dependency>
+    <groupId>io.github.rjjingar</groupId>
+    <artifactId>cachew</artifactId>
+    <version>0.1</version>
+</dependency>
+```
+### Gradle
+```
+implementation 'io.github.rjjingar:cachew:0.1'
+```
 
 ## Usage
 ### Basic usage
